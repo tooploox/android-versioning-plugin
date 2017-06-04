@@ -4,11 +4,16 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.GitCommand
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
-class GitRepository : Repository {
+class GitRepository(
+        repository: org.eclipse.jgit.lib.Repository? = null
+) : Repository {
 
-    private val git = Git.wrap(FileRepositoryBuilder()
-            .findGitDir()
-            .build())
+    private val git = Git.wrap(
+            repository ?:
+                    FileRepositoryBuilder()
+                            .findGitDir()
+                            .build()
+    )
 
     fun <T : GitCommand<R>, R> T.applyAndCall(config: T.() -> Unit): R {
         this.config()
@@ -17,7 +22,9 @@ class GitRepository : Repository {
 
     override fun describe(): String? = DescribeWithPrefixWalk(git.repository).describe()
 
-    override fun currentBranchName(): String = git.repository.exactRef("HEAD").name
+    override fun currentBranchName(): String = git.repository.exactRef("HEAD").target.name.let {
+        org.eclipse.jgit.lib.Repository.shortenRefName(it)
+    }
 
     override fun isClean(): Boolean = git.status().call().isClean
 

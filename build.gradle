@@ -17,7 +17,9 @@ repositories {
 }
 
 dependencies {
-    compile 'org.eclipse.jgit:org.eclipse.jgit:4.7.0.201704051617-r'
+    def jGitVersion = "4.7.0.201704051617-r"
+
+    compile "org.eclipse.jgit:org.eclipse.jgit:$jGitVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile gradleApi()
@@ -25,4 +27,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile "com.nhaarman:mockito-kotlin:1.4.0"
     testCompile 'org.assertj:assertj-core:3.6.2'
+    testCompile "org.eclipse.jgit:org.eclipse.jgit.junit:$jGitVersion"
 }
