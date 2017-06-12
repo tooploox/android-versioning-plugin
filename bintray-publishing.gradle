@@ -1,0 +1,95 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.13"
+    }
+}
+
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+def currentVersion = "0.0.1-alpha"
+
+bintray {
+    user = rootProject.findProperty('bintrayUser')
+    key = rootProject.findProperty('bintrayKey')
+    publications = ["pluginPublication"]
+
+    publish = false
+
+    pkg {
+        repo = 'android'
+        name = 'versioning'
+
+        version {
+            name = currentVersion
+        }
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        }
+    }
+
+    developers {
+        developer {
+            name "Łukasz Wasylkowski"
+            email "lukasz.wasylkowski@tooploox.com"
+            organization "Tooploox"
+            organizationUrl "https://www.tooploox.com/"
+        }
+    }
+
+    scm {
+        url "https://github.com/tooploox/android-versioning-plugin"
+    }
+}
+
+publishing {
+    publications {
+        pluginPublication(MavenPublication) {
+            from components.java
+            groupId "com.tooploox"
+            artifactId "versioning"
+            version currentVersion
+
+            artifact sourceJar
+            artifact javadocJar
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Gradle versioning plugin')
+                root.appendNode('name', 'Versioning')
+                root.appendNode('url', 'https://github.com/tooploox/android-versioning-plugin')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+task sourceJar(type: Jar) {
+    description = "An archive containing the source code"
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
+}
+
+tasks.findAll { it.group == "publishing" }
+        .forEach { it.dependsOn 'build', 'sourceJar', 'javadocJar', 'generatePomFileForPluginPublicationPublication' }

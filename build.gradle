@@ -7,10 +7,13 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.13"
     }
 }
 
 apply plugin: 'kotlin'
+apply from: 'bintray-publishing.gradle'
 
 repositories {
     jcenter()
