@@ -33,7 +33,7 @@ class VersioningPlugin : Plugin<Project> {
         project.tasks.create("increaseVersion", IncreaseVersionTask::class.java) {
             it.group = "Versioning"
             it.description = "Increase version in given _scope_ and tag current commit with new version."
-            it.repository = repository!!
+            it.repository = if (isVersioned(project)) repository!! else GitRepository()
         }
     }
 
