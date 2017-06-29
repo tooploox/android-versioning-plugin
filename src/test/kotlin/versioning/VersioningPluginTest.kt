@@ -54,18 +54,6 @@ class VersioningPluginTest {
     }
 
     @Test
-    fun versionIsStubbedWhenExplicitlyNotVersioned() {
-        project.addVersionedProperty(false)
-
-        plugin.apply(project)
-
-        assertThat(project.versioningExtension.currentVersionCode).isEqualTo(1)
-        assertThat(project.versioningExtension.currentVersionName).isEqualTo("non-versioned")
-
-        verifyZeroInteractions(repository)
-    }
-
-    @Test
     fun versionIsInferredProperlyWhenOnTag() {
         project.addVersionedProperty(true)
 

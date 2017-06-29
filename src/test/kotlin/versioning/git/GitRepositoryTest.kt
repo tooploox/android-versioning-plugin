@@ -1,5 +1,6 @@
 package versioning.git
 
+import com.nhaarman.mockito_kotlin.mock
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
@@ -21,7 +22,7 @@ class GitRepositoryTest : LocalDiskRepositoryTestCase() {
         super.setUp()
 
         repositoryFolder = createWorkRepository()
-        repository = GitRepository(repositoryFolder)
+        repository = GitRepository(mock(), repositoryFolder)
         actualRepo = Git.wrap(repositoryFolder)
 
         JGitTestUtil.writeTrashFile(repositoryFolder, "readme", "[empty]")
