@@ -1,10 +1,17 @@
 package versioning.git
 
+import com.jcraft.jsch.Session
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.GitCommand
+import org.eclipse.jgit.api.errors.TransportException
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.transport.JschConfigSessionFactory
+import org.eclipse.jgit.transport.OpenSshConfig
+import org.eclipse.jgit.transport.SshTransport
+import org.gradle.api.logging.Logger
 
 class GitRepository(
+        private val logger: Logger,
         repository: org.eclipse.jgit.lib.Repository? = null
 ) : Repository {
 
@@ -14,6 +21,12 @@ class GitRepository(
                             .findGitDir()
                             .build()
     )
+
+    private val sshSessionFactory = object : JschConfigSessionFactory() {
+        override fun configure(host: OpenSshConfig.Host, session: Session) {
+            // No-op
+        }
+    }
 
     fun <T : GitCommand<R>, R> T.applyAndCall(config: T.() -> Unit): R {
         this.config()
@@ -33,8 +46,13 @@ class GitRepository(
             name = tagName
         }
 
-        git.push().applyAndCall {
-            add(tag)
+        try {
+            git.push().applyAndCall {
+                setTransportConfigCallback { transport -> (transport as? SshTransport)?.sshSessionFactory = sshSessionFactory }
+                add(tag)
+            }
+        } catch (_: TransportException) {
+            logger.error("Tag push failed. Push the tag by calling `git push origin $tagName` manually.")
         }
     }
 
